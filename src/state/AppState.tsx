@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import type { CaptureImage, ManualWaistPoints, PoseAnalysisResult, StyleGoal, ViewType } from '@/types'
+import type { CaptureImage, ManualHipPoints, ManualWaistPoints, PoseAnalysisResult, StyleGoal, ViewType } from '@/types'
 
 interface AppStateValue {
   captures: Partial<Record<ViewType, CaptureImage>>
@@ -8,6 +8,8 @@ interface AppStateValue {
   setResult: (view: ViewType, result: PoseAnalysisResult) => void
   waistPoints: ManualWaistPoints
   setWaistPoints: (next: ManualWaistPoints) => void
+  hipPoints: ManualHipPoints
+  setHipPoints: (next: ManualHipPoints) => void
   styleGoals: StyleGoal[]
   setStyleGoals: (goals: StyleGoal[]) => void
 }
@@ -18,6 +20,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [captures, setCaptures] = useState<Partial<Record<ViewType, CaptureImage>>>({})
   const [results, setResults] = useState<Partial<Record<ViewType, PoseAnalysisResult>>>({})
   const [waistPoints, setWaistPoints] = useState<ManualWaistPoints>({})
+  const [hipPoints, setHipPoints] = useState<ManualHipPoints>({})
   const [styleGoals, setStyleGoals] = useState<StyleGoal[]>([])
 
   const setCapture = (view: ViewType, image: CaptureImage | null) => {
@@ -32,7 +35,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       delete next[view]
       return next
     })
-    if (view === 'front') setWaistPoints({})
+    if (view === 'front') {
+      setWaistPoints({})
+      setHipPoints({})
+    }
   }
 
   const setResult = (view: ViewType, result: PoseAnalysisResult) => {
@@ -40,8 +46,19 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }
 
   const value = useMemo(
-    () => ({ captures, setCapture, results, setResult, waistPoints, setWaistPoints, styleGoals, setStyleGoals }),
-    [captures, results, waistPoints, styleGoals]
+    () => ({
+      captures,
+      setCapture,
+      results,
+      setResult,
+      waistPoints,
+      setWaistPoints,
+      hipPoints,
+      setHipPoints,
+      styleGoals,
+      setStyleGoals
+    }),
+    [captures, results, waistPoints, hipPoints, styleGoals]
   )
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>

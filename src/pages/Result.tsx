@@ -4,6 +4,7 @@ import { computeBodyMeasurements } from '@/assessment/bodyMeasurements'
 import { computeBodyProfile } from '@/assessment/bodyShape'
 import { computeRecommendations, topPicksByCategory } from '@/assessment/recommendationEngine'
 import BodyBalanceBars from '@/components/BodyBalanceBars'
+import HipPointEditor from '@/components/HipPointEditor'
 import WaistPointEditor from '@/components/WaistPointEditor'
 import {
   BODY_SHAPE_LABELS,
@@ -26,12 +27,12 @@ function SectionHeader({ title }: { title: string }) {
 }
 
 export default function Result() {
-  const { captures, results, waistPoints, setWaistPoints, styleGoals } = useAppState()
+  const { captures, results, waistPoints, setWaistPoints, hipPoints, setHipPoints, styleGoals } = useAppState()
   const navigate = useNavigate()
 
   const measurements = useMemo(
-    () => computeBodyMeasurements(results.front ?? null, waistPoints),
-    [results.front, waistPoints]
+    () => computeBodyMeasurements(results.front ?? null, waistPoints, hipPoints),
+    [results.front, waistPoints, hipPoints]
   )
   const profile = useMemo(() => computeBodyProfile(measurements), [measurements])
   const recommendations = useMemo(() => computeRecommendations(profile, styleGoals), [profile, styleGoals])
@@ -92,6 +93,17 @@ export default function Result() {
           <p>허리 라인: {profile.waistDefinition}</p>
           {profile.upperLowerBalance && <p>상하체 비율: {profile.upperLowerBalance}</p>}
         </div>
+
+        {measurements.hipWidthApprox && (
+          <div className="mt-4 border-t border-studio-100 pt-3">
+            <p className="label-caption mb-1">골반 위치를 직접 표시하면 더 정확해져요</p>
+            <p className="mb-2 text-xs text-alert-amber">
+              지금은 골반 관절 인식 기준 근사치를 쓰고 있어요. 실제 골반 폭보다 좁게 잡혀 "어깨가 넓다"고
+              잘못 나올 수 있으니, 아래에서 직접 표시해보세요.
+            </p>
+            <HipPointEditor imageDataUrl={captures.front.dataUrl} value={hipPoints} onChange={setHipPoints} />
+          </div>
+        )}
 
         {measurements.waistWidthPx == null && (
           <div className="mt-4 border-t border-studio-100 pt-3">

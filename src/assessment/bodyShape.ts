@@ -22,10 +22,17 @@ export function computeBodyProfile(m: BodyMeasurements): BodyProfile {
   }
 
   const shr = m.shoulderHipRatio
-  basis.push(`어깨/골반 비율(SHR) ${shr}`)
+  basis.push(`어깨/골반 비율(SHR) ${shr}${m.hipWidthApprox ? ' (골반 폭은 관절 landmark 기준 근사치)' : ''}`)
 
+  // MediaPipe의 hip landmark(고관절)는 실제 눈에 보이는 골반 폭보다 좁게 잡히는 경향이 있어,
+  // 골반 지점을 직접 표시하지 않았을 때는 "어깨가 더 넓다"고 판단하는 기준을 더 엄격하게 둔다
+  // (반대로 "골반이 더 넓다"는 판단은 이미 좁게 측정된 값 기준으로도 나온 것이라 그대로 둔다).
+  const shoulderWideThreshold = m.hipWidthApprox ? 1.18 : 1.05
   const shoulderVsHip: BodyProfile['shoulderVsHip'] =
-    shr > 1.05 ? '어깨가 더 넓은 편' : shr < 0.95 ? '골반이 더 넓은 편' : '균형 잡힌 편'
+    shr > shoulderWideThreshold ? '어깨가 더 넓은 편' : shr < 0.95 ? '골반이 더 넓은 편' : '균형 잡힌 편'
+  if (m.hipWidthApprox) {
+    basis.push('골반 위치를 직접 표시하면 어깨/골반 비교가 더 정확해집니다')
+  }
 
   let waistDefinition: BodyProfile['waistDefinition'] = '측정 불확실'
   let hasCurve = false
@@ -42,7 +49,8 @@ export function computeBodyProfile(m: BodyMeasurements): BodyProfile {
       m.upperLowerRatio > 1.05 ? '상체가 상대적으로 긴 편' : m.upperLowerRatio < 0.9 ? '하체가 상대적으로 긴 편' : '균형 잡힌 편'
   }
 
-  const confidence: ProfileConfidence = m.curvatureScore != null ? 'high' : 'moderate'
+  const confidence: ProfileConfidence =
+    m.curvatureScore != null && !m.hipWidthApprox ? 'high' : m.curvatureScore != null || !m.hipWidthApprox ? 'moderate' : 'low'
 
   let primaryShape: PrimaryBodyShape
   if (m.curvatureScore != null) {

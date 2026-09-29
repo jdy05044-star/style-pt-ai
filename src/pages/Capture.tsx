@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { analyzePose } from '@/lib/poseLandmarker'
+import HipPointEditor from '@/components/HipPointEditor'
 import PhotoCapture from '@/components/PhotoCapture'
 import WaistPointEditor from '@/components/WaistPointEditor'
 import { useAppState } from '@/state/AppState'
 
 export default function Capture() {
-  const { captures, setCapture, setResult, waistPoints, setWaistPoints } = useAppState()
+  const { captures, setCapture, setResult, waistPoints, setWaistPoints, hipPoints, setHipPoints } = useAppState()
   const navigate = useNavigate()
   const [analyzing, setAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -43,6 +44,17 @@ export default function Capture() {
       <div className="mb-4">
         <PhotoCapture view="front" value={captures.front ?? null} onChange={(img) => setCapture('front', img)} />
       </div>
+
+      {captures.front && (
+        <div className="card mb-4 p-4">
+          <h3 className="mb-1 text-sm font-semibold text-studio-900">골반 위치 직접 표시 (권장)</h3>
+          <p className="mb-2 text-xs text-alert-amber">
+            골반 자동 인식은 고관절 기준이라 실제보다 좁게 잡히기 쉬워요. 체형 분류 정확도를 위해 표시를
+            권장드려요.
+          </p>
+          <HipPointEditor imageDataUrl={captures.front.dataUrl} value={hipPoints} onChange={setHipPoints} />
+        </div>
+      )}
 
       {captures.front && (
         <div className="card mb-4 p-4">

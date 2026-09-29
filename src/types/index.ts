@@ -70,10 +70,22 @@ export interface ManualPoint {
  * 허리 지점은 제공하지 않음). 그래서 사용자가 사진 위에서 직접 탭해 좌우 허리 위치를 표시하면
  * 그 값으로만 허리 관련 지표를 계산하고, 표시하지 않으면 "측정 불확실"로 남긴다.
  */
-export interface ManualWaistPoints {
+export interface ManualPointPair {
   left?: ManualPoint
   right?: ManualPoint
 }
+
+/** 이전 이름과의 호환용 별칭 */
+export type ManualWaistPoints = ManualPointPair
+
+/**
+ * MediaPipe Pose의 hip landmark(23/24번)는 골반뼈 중 가장 넓은 지점이 아니라 고관절(다리가
+ * 몸통에 붙는 관절) 위치에 가깝게 잡힌다. 그래서 이 landmark만으로 골반 폭을 재면, 실제
+ * 눈으로 보이는 골반 폭보다 좁게 잡혀 "어깨가 더 넓다"고 잘못 판단되는 경우가 있다.
+ * 이를 보완하기 위해 허리와 마찬가지로 사용자가 직접 골반이 가장 넓어 보이는 좌우 지점을
+ * 표시할 수 있게 하고, 표시하면 그 값을 landmark 값보다 우선한다.
+ */
+export type ManualHipPoints = ManualPointPair
 
 /** 스타일 목표 (요청 스펙 19번 항목) */
 export type StyleGoal =
@@ -117,6 +129,9 @@ export const STYLE_GOAL_OPTIONS: StyleGoal[] = Object.keys(STYLE_GOAL_LABELS) as
 export interface BodyMeasurements {
   shoulderWidthPx: number | null
   hipWidthPx: number | null
+  /** true면 hipWidthPx가 사용자가 직접 표시한 골반 지점이 아니라, 관절 landmark 기준 근사치라는 뜻
+   *  (실제 골반 폭보다 좁게 잡힐 수 있음 — 참고: ManualHipPoints 설명) */
+  hipWidthApprox: boolean
   waistWidthPx: number | null
   torsoLengthPx: number | null
   legLengthPx: number | null

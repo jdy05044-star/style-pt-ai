@@ -13,7 +13,7 @@ export default function BodyBalanceBars({ measurements: m }: Props) {
   const rows: { label: string; px: number | null }[] = [
     { label: '어깨', px: m.shoulderWidthPx },
     { label: '허리', px: m.waistWidthPx },
-    { label: '골반', px: m.hipWidthPx }
+    { label: m.hipWidthApprox ? '골반*' : '골반', px: m.hipWidthPx }
   ]
   const known = rows.filter((r) => r.px != null).map((r) => r.px as number)
   if (known.length === 0) return null
@@ -35,6 +35,7 @@ export default function BodyBalanceBars({ measurements: m }: Props) {
           {r.px == null && <span className="w-16 flex-none text-right text-[10px] text-studio-400">측정 불확실</span>}
         </div>
       ))}
+      {m.hipWidthApprox && <p className="text-[10px] text-studio-400">* 골반은 관절 인식 기준 근사치 (실제보다 좁게 나올 수 있음)</p>}
     </div>
   )
 }
