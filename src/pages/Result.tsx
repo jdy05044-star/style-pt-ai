@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { computeBodyMeasurements } from '@/assessment/bodyMeasurements'
 import { computeBodyProfile } from '@/assessment/bodyShape'
+import { computePostureSignals } from '@/assessment/postureSignals'
 import { computeRecommendations, topPicksByCategory } from '@/assessment/recommendationEngine'
 import BodyBalanceBars from '@/components/BodyBalanceBars'
 import HipPointEditor from '@/components/HipPointEditor'
@@ -35,6 +36,10 @@ export default function Result() {
     [results.front, waistPoints, hipPoints]
   )
   const profile = useMemo(() => computeBodyProfile(measurements), [measurements])
+  const postureSignals = useMemo(
+    () => computePostureSignals(results.front ?? null, results.side ?? null),
+    [results.front, results.side]
+  )
   const recommendations = useMemo(() => computeRecommendations(profile, styleGoals), [profile, styleGoals])
   const topPicks = useMemo(() => topPicksByCategory(recommendations), [recommendations])
 
@@ -114,6 +119,43 @@ export default function Result() {
 
         <p className="mt-3 text-xs text-studio-400">
           체형은 사진 한 장 기준의 참고용 분류이며, 카메라 거리·자세·옷차림에 따라 오차가 있을 수 있습니다.
+        </p>
+      </div>
+
+      <SectionHeader title="정렬 지표 (참고)" />
+      <div className="card mb-4 p-4">
+        <p className="mb-3 text-xs text-studio-500">
+          통증·질환을 판단하는 지표가 아니라, 코디에 참고할 수 있는 좌우/정렬 경향만 보여드려요.
+        </p>
+        <ul className="space-y-2 text-sm text-studio-700">
+          <li>
+            어깨 기울기:{' '}
+            {postureSignals.shoulderTiltDeg != null
+              ? `${postureSignals.shoulderTiltDeg}° · ${postureSignals.shoulderTiltDirection}`
+              : '측정 불확실'}
+          </li>
+          <li>
+            골반 기울기:{' '}
+            {postureSignals.pelvisTiltDeg != null
+              ? `${postureSignals.pelvisTiltDeg}° · ${postureSignals.pelvisTiltDirection}`
+              : '측정 불확실'}
+          </li>
+          <li>
+            무릎 정렬 (좌 / 우): {postureSignals.kneeAlignmentLeft.direction ?? '측정 불확실'} /{' '}
+            {postureSignals.kneeAlignmentRight.direction ?? '측정 불확실'}
+          </li>
+          {postureSignals.forwardHeadNote ? (
+            <li>머리 전방 위치: {postureSignals.forwardHeadDeg}° · {postureSignals.forwardHeadNote}</li>
+          ) : (
+            <li className="text-studio-400">머리 전방 위치: 측면 사진이 없어 측정 불확실</li>
+          )}
+        </ul>
+        {postureSignals.asymmetryNote && (
+          <p className="mt-3 border-t border-studio-100 pt-3 text-xs text-studio-500">{postureSignals.asymmetryNote}</p>
+        )}
+        <p className="mt-3 text-xs text-studio-400">
+          목/팔 길이는 절대 치수가 아니라 사진 속 상대적인 비율 계산에만 쓰이며, 이 화면에는 따로 표시하지
+          않습니다.
         </p>
       </div>
 
