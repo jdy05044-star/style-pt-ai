@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-studio-50 text-studio-900 antialiased;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-studio-700 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-studio-800 disabled:cursor-not-allowed disabled:bg-studio-300;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border border-studio-300 bg-white px-5 py-3 text-sm font-medium text-studio-700 transition-colors hover:bg-studio-100;
+  }
+  .card {
+    @apply rounded-xl border border-studio-200 bg-white shadow-sm;
+  }
+  .label-caption {
+    @apply text-xs font-medium text-studio-500;
+  }
+}
